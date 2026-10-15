@@ -1,0 +1,49 @@
+{
+  "D1": {
+    "title_zh": "灰階與模糊的先後之謎",
+    "title_en": "Intensity-Blur Ordering",
+    "files": {
+      "inputs": [
+        "D1_input_00.npy",
+        "D1_input_01.npy",
+        "D1_input_02.npy"
+      ],
+      "targets": [
+        "D1_target_00.npy",
+        "D1_target_01.npy",
+        "D1_target_02.npy"
+      ],
+      "public": [
+        "D1_preview.png"
+      ]
+    },
+    "public_settings": "Inputs: 2 head slices (skimage data.brain) + Shepp-Logan phantom, resized to 128x128 with skimage.transform.resize(anti_aliasing=True), then per-image min-max scaled to [0,1], float32. Targets are float32 in [0,1], computed in floating point with no re-stretching. Candidate operation family (order hidden): linear window/level clip((x-lo)/(hi-lo),0,1), power-law (gamma) mapping, Gaussian smoothing (scipy.ndimage.gaussian_filter, truncate=3, mode='reflect'). Search grid: window endpoints step 0.05, gamma step 0.05, sigma step 0.2.",
+    "metric": "SSIM (data_range=1) and MAE, per image against the target",
+    "threshold": "SSIM >= 0.98 and MAE <= 0.005 on every image",
+    "deliverable": "A python function reproduce_D1(inputs) -> outputs (list of 128x128 float32 arrays), plus a report section (inferred pipeline and parameters, at least two hypotheses compared, supporting figures/numbers, failure cases or non-identifiability)."
+  },
+  "D2": {
+    "title_zh": "頻譜上的手術",
+    "title_en": "Spectral Filter Forensics",
+    "files": {
+      "inputs": [
+        "D2_input_00.npy",
+        "D2_input_01.npy",
+        "D2_input_02.npy"
+      ],
+      "targets": [
+        "D2_target_00.npy",
+        "D2_target_01.npy",
+        "D2_target_02.npy"
+      ],
+      "public": [
+        "D2_preview.png"
+      ]
+    },
+    "public_settings": "Inputs: the same 3 images as D1 (same 128x128 [0,1] normalization) with periodic stripe patterns added, not clipped, so input values may lie slightly outside [0,1]. Targets are the teacher's filtered result, float32, real-valued, may also lie slightly outside [0,1]. Filter family: a Gaussian low-pass applied in the 2-D DFT domain (numpy.fft.fft2 + fftshift, no extra normalization) combined with at most two conjugate pairs of notch filters. Output is the real part of the inverse transform. Search grid: Gaussian sigma (in DFT index units) step 1; notch centres on integer DFT bins, notch radius in {0, 1, 2}.",
+    "metric": "MAE and PSNR (data range 1), per image against the target",
+    "threshold": "MAE <= 0.0008 and PSNR >= 53.0 dB on every image",
+    "deliverable": "A python function reproduce_D2(inputs) -> outputs (list of 128x128 float32 arrays), the spectral mask you used, an explanation of which frequencies were removed, plus the report section as in D1."
+  },
+  "array_format": "all .npy are float32, shape (128, 128); D*_preview.png is display only (clipped to [0,1])"
+}
